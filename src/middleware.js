@@ -1,37 +1,41 @@
 import { NextResponse } from "next/server";
 
 export function middleware(request) {
-    const authHeader = request.headers.get("authorization");
+  const authHeader = request.headers.get("authorization");
 
-    // These stay ONLY on the server (not exposed to client)
-    const USER = process.env.ACCESS_USER;
-    const PASS = process.env.ACCESS_PASS;
+  const USER = process.env.ACCESS_USER;
+  const PASS = process.env.ACCESS_PASS;
 
-    // If no Authorization header → ask for credentials
-    if (!authHeader) {
-        return new Response("Authentication required", {
-            status: 401,
-            headers: {
-                "WWW-Authenticate": 'Basic realm="Private Area"',
-            },
-        });
-    }
+  // Helper: always respond with 401 so browser shows login popup
+  const askForAuth = () =>
+    new Response("Authentication required", {
+      status: 401,
+      headers: {
+        "WWW-Authenticate": 'Basic realm="Private Area"',
+      },
+    });
 
-    // Expect header like: "Basic base64(user:pass)"
-    const [scheme, encoded] = authHeader.split(" ");
+  // No Authorization header → ask for credentials
+  if (!authHeader) {
+    return askForAuth();
+  }
 
-    if (scheme !== "Basic" || !encoded) {
-        return new Response("Invalid auth", { status: 400 });
-    }
+  const [scheme, encoded] = authHeader.split(" ");
 
-    // Edge Runtime has `atob` built-in, no Node Buffer needed
-    const decoded = atob(encoded);
-    const [user, pass] = decoded.split(":");
+  // Not Basic auth → ask again
+  if (scheme !== "Basic" || !encoded) {
+    return askForAuth();
+  }
 
-    if (user === USER && pass === PASS) {
-        // Correct credentials → allow request to continue
-        return NextResponse.next();
-    }
+  // Decode "user:pass"
+  const decoded = atob(encoded);
+  const [user, pass] = decoded.split(":");
 
-    return new Response("Forbidden", { status: 403 });
+  // Correct credentials → let request continue
+  if (user === USER && pass === PASS) {
+    return NextResponse.next();
+  }
+
+  // Wrong credentials → ask again (not 403)
+  return askForAuth();
 }
