@@ -42,14 +42,14 @@ export function HomeLayout({ stocks }: HomeLayoutProps) {
 
             {/* Main Content */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Left: Form */}
-                <div>
-                    <StockForm stocks={stocks} onTradeCreated={handleTradeCreated} />
+                {/* Trades List - Shows 2nd on mobile, right on desktop */}
+                <div className="order-1 lg:order-2">
+                    <TradesList key={refreshKey} stocks={stocks} onRefresh={handleRefresh} />
                 </div>
 
-                {/* Right: Trades List */}
-                <div>
-                    <TradesList key={refreshKey} stocks={stocks} onRefresh={handleRefresh} />
+                {/* Form - Shows 3rd on mobile, left on desktop */}
+                <div className="order-2 lg:order-1">
+                    <StockForm stocks={stocks} onTradeCreated={handleTradeCreated} />
                 </div>
             </div>
         </div>

@@ -6,6 +6,9 @@ import { Card, CardContent } from "@/components/ui/card"
 interface SummaryData {
     buyCount: number
     shortCount: number
+    buyAmount: number
+    shortAmount: number
+    totalAmount: number
     totalProfitLoss: number
 }
 
@@ -17,6 +20,9 @@ export function SummaryBar({ refreshKey }: SummaryBarProps) {
     const [summary, setSummary] = React.useState<SummaryData>({
         buyCount: 0,
         shortCount: 0,
+        buyAmount: 0,
+        shortAmount: 0,
+        totalAmount: 0,
         totalProfitLoss: 0,
     })
     const [loading, setLoading] = React.useState(true)
@@ -46,24 +52,68 @@ export function SummaryBar({ refreshKey }: SummaryBarProps) {
 
     return (
         <Card className="w-full">
-            <CardContent className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-8">
+            <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                    {/* Buy Count */}
                     <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">Buy Count</span>
-                        <span className="text-2xl font-bold text-green-600">
+                        <span className="text-xl md:text-2xl font-bold text-green-600">
                             {loading ? "..." : summary.buyCount}
                         </span>
                     </div>
+
+                    {/* Buy Amount */}
+                    <div className="flex flex-col">
+                        <span className="text-sm text-muted-foreground">Buy Investment</span>
+                        <span className="text-xl md:text-2xl font-bold text-green-600">
+                            {loading
+                                ? "..."
+                                : `₹${summary.buyAmount.toLocaleString("en-IN", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                })}`}
+                        </span>
+                    </div>
+
+                    {/* Short Count */}
                     <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">Short Count</span>
-                        <span className="text-2xl font-bold text-red-600">
+                        <span className="text-xl md:text-2xl font-bold text-red-600">
                             {loading ? "..." : summary.shortCount}
                         </span>
                     </div>
+
+                    {/* Short Amount */}
+                    <div className="flex flex-col">
+                        <span className="text-sm text-muted-foreground">Short Investment</span>
+                        <span className="text-xl md:text-2xl font-bold text-red-600">
+                            {loading
+                                ? "..."
+                                : `₹${summary.shortAmount.toLocaleString("en-IN", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                })}`}
+                        </span>
+                    </div>
+
+                    {/* Total Amount */}
+                    <div className="flex flex-col">
+                        <span className="text-sm text-muted-foreground">Total Investment</span>
+                        <span className="text-xl md:text-2xl font-bold text-blue-600">
+                            {loading
+                                ? "..."
+                                : `₹${summary.totalAmount.toLocaleString("en-IN", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                })}`}
+                        </span>
+                    </div>
+
+                    {/* Result of Day */}
                     <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">Result of Day</span>
                         <span
-                            className={`text-2xl font-bold ${summary.totalProfitLoss >= 0
+                            className={`text-xl md:text-2xl font-bold ${summary.totalProfitLoss >= 0
                                     ? "text-green-600"
                                     : "text-red-600"
                                 }`}

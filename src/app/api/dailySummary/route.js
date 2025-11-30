@@ -22,8 +22,30 @@ export async function GET(req) {
         if (error) throw error;
 
         // Calculate summary
-        const buyCount = positions?.filter(p => p.entry_type === "buy").length || 0;
-        const shortCount = positions?.filter(p => p.entry_type === "short").length || 0;
+        const buyPositions = positions?.filter(p => p.entry_type === "buy") || [];
+        const shortPositions = positions?.filter(p => p.entry_type === "short") || [];
+
+        const buyCount = buyPositions.length;
+        const shortCount = shortPositions.length;
+
+        // Calculate buy amount (total invested in buy trades)
+        const buyAmount = buyPositions.reduce((sum, p) => {
+            const price = parseFloat(p.purchase_price) || 0;
+            const qty = parseFloat(p.quantity) || 0;
+            return sum + (price * qty);
+        }, 0);
+
+        // Calculate short amount (total invested in short trades)
+        const shortAmount = shortPositions.reduce((sum, p) => {
+            const price = parseFloat(p.purchase_price) || 0;
+            const qty = parseFloat(p.quantity) || 0;
+            return sum + (price * qty);
+        }, 0);
+
+        // Calculate total amount
+        const totalAmount = buyAmount + shortAmount;
+
+        // Calculate total profit/loss
         const totalProfitLoss = positions?.reduce((sum, p) => {
             return sum + (parseFloat(p.profit_loss) || 0);
         }, 0) || 0;
@@ -33,6 +55,9 @@ export async function GET(req) {
             data: {
                 buyCount,
                 shortCount,
+                buyAmount,
+                shortAmount,
+                totalAmount,
                 totalProfitLoss,
             },
         });
